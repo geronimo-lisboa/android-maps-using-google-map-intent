@@ -3,10 +3,12 @@ package geronimo.don.googlemapsintenttest
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,9 +21,6 @@ import com.google.android.gms.location.LocationServices
 import io.reactivex.Single
 
 class MainActivity : AppCompatActivity() {
-    //private lateinit var mGoogleApiClient : GoogleApiClient
-    //private lateinit var fusedLocationClient : FusedLocationProviderClient
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,10 +35,24 @@ class MainActivity : AppCompatActivity() {
         val x =getCurrentLocationRx()
             .subscribe { location:Location->
                 Toast.makeText(this, "LOCATION = ${location.longitude}, ${location.latitude}", Toast.LENGTH_LONG).show()
+                showMap(location)
             }
 
     }
 
+    private fun showMap(location:Location){
+        val uri = Uri.parse("geo:${location.latitude},${location.longitude}")
+        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivityForResult(mapIntent, TESTE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode ==  TESTE){
+            Log.d(TAG, "xxx")
+        }
+    }
     @SuppressLint("MissingPermission")
     private fun getCurrentLocationRx():Single<Location>{
         val fusedClient = LocationServices.getFusedLocationProviderClient(this)
@@ -97,5 +110,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         val PERMISSION_REQUEST_CODE = 666
         val TAG = "teste_map"
+        val TESTE = 10
     }
 }
